@@ -1,9 +1,10 @@
 import { encryptSafely } from "@metamask/eth-sig-util";
+import { Contract } from "ethers";
 import React, { ChangeEvent, useEffect, useRef, useState } from "react";
 interface Props {
 	to: string | null;
 	OnSend: (data: string, toAddress: string) => Promise<void>;
-	pubKey: string;
+	contract: Contract | undefined;
 }
 
 export default function NewMail(props: Props) {
@@ -11,10 +12,12 @@ export default function NewMail(props: Props) {
 	const destAddress = useRef<any>();
 	const subject = useRef<any>();
 	const [loading, setLoading] = useState<boolean>(false);
+	const encrypt = async (data: any) => {
+		if (!props.contract) return "";
+		const key: string = await props.contract["getKey"](destAddress.current.value as string);
 
-	const encrypt = (data: any) => {
 		let enc = encryptSafely({
-			publicKey: props.pubKey,
+			publicKey: key,
 			version: "x25519-xsalsa20-poly1305",
 			data: JSON.stringify(data),
 		});
@@ -48,14 +51,14 @@ export default function NewMail(props: Props) {
 					}}
 					onClick={() => {
 						setLoading(true);
-						props
-							.OnSend(
-								encrypt({
-									content: contentRef.current.value as string,
-									subject: subject.current.value as string,
-								}),
-								destAddress.current.value
-							)
+						encrypt({
+							content: contentRef.current.value as string,
+							subject: subject.current.value as string,
+						})
+							.then((data) => {
+								return props.OnSend(data, destAddress.current.value);
+							})
+
 							.then(() => {
 								clearAll();
 							})

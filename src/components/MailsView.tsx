@@ -56,7 +56,7 @@ export default function MailsView(props: Props) {
 						flexDirection: "column",
 					}}
 				>
-					<div className="from">
+					<div>
 						<strong>From:</strong> {props.item?.from}
 					</div>
 					{props.item?.decrypted ? (

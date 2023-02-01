@@ -107,7 +107,7 @@ function App() {
 							OnSend={(data, to) => {
 								return sendMail(to, data);
 							}}
-							pubKey={pubKey || ""}
+							contract={contract}
 						></NewMail>
 					</div>
 				</>
